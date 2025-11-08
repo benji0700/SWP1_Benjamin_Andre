@@ -18,18 +18,10 @@ def karten_Zuteilen():
     return erg
 
 
-def ziehung(vorkommen):
-    zahl = list(range(1, 53))
-    erg = []
-    for j in range(5):
-        gezogen = random.randint(0, len(zahl) - j - 1)
-        gezogene_zahl = zahl[gezogen]
-        erg.append(gezogen)
-        letzte_position = len(zahl) - j - 1
-        letzte_zahl = zahl[letzte_position]
-        zahl[gezogen] = letzte_zahl
-        zahl[letzte_position] = gezogene_zahl
-    return erg
+def ziehung():
+    karten = list(range(1, 53))
+    gezogene = random.sample(karten, 5)
+    return gezogene
 
 def kartenwerte(gezogene):
     """
@@ -39,6 +31,56 @@ def kartenwerte(gezogene):
     """
     werte = [(karte - 1) % 13 + 1 for karte in gezogene]
     return werte
+
+def royalFlush(gezogenen):
+    werte = kartenwerte(gezogenen)
+    werte.sort()    ### damit es 1, 10, 11, 12, 13 ist
+
+    if(werte == [1, 10, 11, 12, 13]):
+        if(flush(gezogenen)):
+            return True
+    return False
+
+def straightFlush(gezogene):
+    if(straight(gezogene) and flush(gezogene)):
+        return True
+    return False
+
+def vierling(gezogene):
+    werte = kartenwerte(gezogene)
+    for wert in werte:
+        if werte.count(wert) == 4:
+            return True
+    return False
+
+def fullHouse(gezogene):
+    """
+    Prüft, ob die 5 gezogenen Karten ein Full House bilden.
+    Ein Full House = genau 3 Karten mit dem gleichen Wert (Drilling)
+                 + genau 2 Karten mit einem anderen gleichen Wert (Paar).
+    Erwartet: 'gezogene' ist eine Liste von Kartennummern 1–52.
+    Liefert: True wenn Full House, sonst False.
+    """
+
+    # 1) Werte (1–13) aus den Kartennummern berechnen
+    #    (z. B. 1=Ass, 11=Bube, 12=Dame, 13=König)
+    werte = kartenwerte(gezogene)
+
+    # 2) Ein Full House hat genau 2 verschiedene Werte.
+    #    Wenn es nicht genau 2 sind, kann es kein Full House sein.
+    einzigartige = set(werte)
+    if len(einzigartige) != 2:
+        return False
+
+    # 3) Für die beiden vorhandenen Werte zählen, wie oft sie vorkommen.
+    #    Beispiel: counts könnte [3,2] oder [2,3] sein.
+    counts = [werte.count(w) for w in einzigartige]
+
+    # 4) Sortieren erleichtert den Vergleich: [2,3] ist das Kennzeichen für Full House.
+    counts.sort()
+
+    # 5) Wenn die Häufigkeiten genau [2,3] sind, ist es ein Full House.
+    return counts == [2, 3]
 
 
 def flush(gezogene):
@@ -131,22 +173,41 @@ def paar(gezogene):
 
 
 if __name__ == "__main__":
-    alle_Karten = karten_Zuteilen()     ### Karten einfügen
-    vorkommen = [0, 0, 0, 0, 0, 0, 0, 0, 0]
-    for i in range(1, 100000):         ### 100000 mal ausführen
-        gezogene = ziehung(alle_Karten)     ### die Zahlen ziehen
+    vorkommen = {
+        "Paar": 0,
+        "Zwei Paare": 0,
+        "Drilling": 0,
+        "Straight": 0,
+        "Flush": 0,
+        "Full House": 0,
+        "Vierling": 0,
+        "Straight Flush": 0,
+        "Royal Flush": 0
+    }
+    for _ in range(100000):
+        gezogene = ziehung()
         gezogene = sorted(gezogene)
 
-        if flush(gezogene):
-            vorkommen[4] += 1
+        vorkommen.values()
+        if royalFlush(gezogene):
+            vorkommen["Royal Flush"] += 1
+        elif straightFlush(gezogene):
+            vorkommen["Straight Flush"] += 1
+        elif vierling(gezogene):
+            vorkommen["Vierling"] += 1
+        elif fullHouse(gezogene):
+            vorkommen["Full House"] += 1
+        elif flush(gezogene):
+            vorkommen["Flush"] += 1
         elif straight(gezogene):
-            vorkommen[3] += 1
+            vorkommen["Straight"] += 1
         elif drilling(gezogene):
-            vorkommen[2] += 1
+            vorkommen["Drilling"] += 1
         elif zweiPaare(gezogene):
-            vorkommen[1] += 1
+            vorkommen["Zwei Paare"] += 1
         elif paar(gezogene):
-            vorkommen[0] += 1
+            vorkommen["Paar"] += 1
 
-    for wahrscheinlichkeit in vorkommen:
-        print(wahrscheinlichkeit / 100000)      ### Wahrscheinlichkeiten ausgeben
+    for hand, count in vorkommen.items():
+        wahrscheinlichkeit = count / 100000  # 100000 = Gesamtzahl der Ziehungen
+        print(f"{hand}: {wahrscheinlichkeit:.6f}")
