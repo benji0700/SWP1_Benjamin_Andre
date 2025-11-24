@@ -35,23 +35,14 @@ def kartenwerte(gezogene):
 def royalFlush(gezogenen):
     werte = kartenwerte(gezogenen)
     werte.sort()    ### damit es 1, 10, 11, 12, 13 ist
-
-    if(werte == [1, 10, 11, 12, 13]):
-        if(flush(gezogenen)):
-            return True
-    return False
+    return True if (werte == [1, 10, 11, 12, 13] and flush(gezogenen)) else False
 
 def straightFlush(gezogene):
-    if(straight(gezogene) and flush(gezogene)):
-        return True
-    return False
+    return True if (straight(gezogene) and flush(gezogene)) else False
 
 def vierling(gezogene):
     werte = kartenwerte(gezogene)
-    for wert in werte:
-        if werte.count(wert) == 4:
-            return True
-    return False
+    return True if any(werte.count(wert) == 4 for wert in werte) else False
 
 def fullHouse(gezogene):
     """
@@ -86,29 +77,7 @@ def fullHouse(gezogene):
 def flush(gezogene):
     gedreht = gezogene[:]   ### erstellt eine Kopie, damit nicht so viel Speicher verwendet wird! Noch googlen!
     gedreht.reverse()
-    for i in range(1, len(gedreht)):
-        if not ((gedreht[i] - 1) // 13 == (gedreht[i - 1] - 1) // 13):
-            ### floor devision noch vorher -1, weil KI-Hilfe!
-            return False
-    return True
-
-'''
-            Kartennummer
-            Ohne -1
-            Mit -1 (korrekt)
-            1 (Herz Ass)
-            1 // 13 = 0 ✓
-            (1-1) // 13 = 0 ✓
-            13 (Herz König)
-            13 // 13 = **1** ❌
-            (13-1) // 13 = **0** ✓
-            14 (Karo Ass)
-            14 // 13 = **1** ✓
-            (14-1) // 13 = **1** ✓
-            26 (Karo König)
-            26 // 13 = **2** ❌
-            (26-1) // 13 = **1** ✓'''
-
+    return all((gedreht[i] - 1) // 13 == (gedreht[i - 1] - 1) // 13 for i in range(1, len(gedreht)))
 
 
 def straight(gezogene):
@@ -121,14 +90,11 @@ def straight(gezogene):
     werte.sort()
 
     # Normale Straße prüfen (z. B. 5–6–7–8–9)
-    if all(werte[i] == werte[i - 1] + 1 for i in range(1, len(werte))):
-        return True
-
+    normale_strasse = all(werte[i] == werte[i - 1] + 1 for i in range(1, len(werte)))
     # Sonderfall: Ass-hoch-Straße (10–Bube–Dame–König–Ass)
-    if werte == [1, 10, 11, 12, 13]:
-        return True
+    ass_hoch = werte == [1, 10, 11, 12, 13]
 
-    return False
+    return True if (normale_strasse or ass_hoch) else False
 
 
 def drilling(gezogene):
@@ -137,10 +103,7 @@ def drilling(gezogene):
     Beispiel: [7, 7, 7, 2, 10]
     """
     werte = kartenwerte(gezogene)
-    for wert in werte:
-        if werte.count(wert) == 3:
-            return True
-    return False
+    return True if any(werte.count(wert) == 3 for wert in werte) else False
 
 
 def zweiPaare(gezogene):
@@ -149,14 +112,8 @@ def zweiPaare(gezogene):
     Beispiel: [5, 5, 9, 9, 12]
     """
     werte = kartenwerte(gezogene)
-    paare = 0
-
-    # Alle Werte durchgehen
-    for wert in set(werte):
-        if werte.count(wert) == 2:
-            paare += 1
-
-    return paare == 2
+    paare = sum(1 for wert in set(werte) if werte.count(wert) == 2)
+    return True if paare == 2 else False
 
 
 def paar(gezogene):
@@ -165,10 +122,7 @@ def paar(gezogene):
     Beispiel: [5, 5, 7, 9, 12]
     """
     werte = kartenwerte(gezogene)
-    for wert in werte:
-        if werte.count(wert) == 2:
-            return True
-    return False
+    return True if any(werte.count(wert) == 2 for wert in werte) else False
 
 
 
