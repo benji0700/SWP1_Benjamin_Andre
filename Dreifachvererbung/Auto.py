@@ -4,7 +4,7 @@ class Fahrzeug:
         self.max_geschwindigkeit = max_geschwindigkeit
 
     def info(self):
-        return f"Marke: {self.marke}, Max. Geschw.: {self.max_geschwindigkeit} km/h"
+        return "Marke: {self.marke}, Max. Geschw.: {self.max_geschwindigkeit} km/h"
 
 
 class Auto(Fahrzeug):
@@ -14,7 +14,6 @@ class Auto(Fahrzeug):
 
     def info(self):
         return super().info() + ", Türen: {self.anzahl_tueren}"
-
 
 class Audi(Auto):
     def __init__(self, max_geschwindigkeit, anzahl_tueren, modell):
