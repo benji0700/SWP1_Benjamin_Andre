@@ -1,4 +1,6 @@
+import functools
 import random
+import time
 # liste 52 Zahlen
 # floor divison
 # modulo 13 um aufs symbol zu kommen
@@ -124,9 +126,19 @@ def paar(gezogene):
     werte = kartenwerte(gezogene)
     return True if any(werte.count(wert) == 2 for wert in werte) else False
 
+def timer(func):
+    @functools.wraps(func)
+    def wrapper_timer(*args):
+        start_time = time.perf_counter()
+        value = func(*args)
+        end_time = time.perf_counter()
+        run_time = end_time - start_time
+        print(f"Finished {func.__name__}() in {run_time:.4f} secs")
+        return value
+    return wrapper_timer
 
-
-if __name__ == "__main__":
+@timer          ### musste man in Funktion auslagern, weil es hat @timer gebraucht
+def simulation():
     vorkommen = {
         "Paar": 0,
         "Zwei Paare": 0,
@@ -142,7 +154,6 @@ if __name__ == "__main__":
         gezogene = ziehung()
         gezogene = sorted(gezogene)
 
-        vorkommen.values()
         if royalFlush(gezogene):
             vorkommen["Royal Flush"] += 1
         elif straightFlush(gezogene):
@@ -165,3 +176,7 @@ if __name__ == "__main__":
     for hand, count in vorkommen.items():
         wahrscheinlichkeit = count / 100000  # 100000 = Gesamtzahl der Ziehungen
         print(f"{hand}: {wahrscheinlichkeit:.6f}")
+
+
+if __name__ == "__main__":
+    simulation()
